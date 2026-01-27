@@ -1,0 +1,48 @@
+{
+  "timestamp": "2026-01-27T04:33:38.128524",
+  "total_tests": 8,
+  "passed_tests": 8,
+  "success_rate": "100.0%",
+  "test_details": [
+    {
+      "test": "API Root Endpoint",
+      "success": true,
+      "details": "Response: {'message': 'IoT Dashboard API'}"
+    },
+    {
+      "test": "Sensors Endpoint",
+      "success": true,
+      "details": "All 5 sensors returned with correct structure"
+    },
+    {
+      "test": "Sensor History Endpoint (SENSOR-01)",
+      "success": true,
+      "details": "24 hours of historical data returned with correct structure for SENSOR-01"
+    },
+    {
+      "test": "Sensor History Endpoint (SENSOR-02)",
+      "success": true,
+      "details": "24 hours of historical data returned with correct structure for SENSOR-02"
+    },
+    {
+      "test": "Sensor History Endpoint (SENSOR-03)",
+      "success": true,
+      "details": "24 hours of historical data returned with correct structure for SENSOR-03"
+    },
+    {
+      "test": "Sensor History Endpoint (SENSOR-04)",
+      "success": true,
+      "details": "24 hours of historical data returned with correct structure for SENSOR-04"
+    },
+    {
+      "test": "Sensor History Endpoint (SENSOR-05)",
+      "success": true,
+      "details": "24 hours of historical data returned with correct structure for SENSOR-05"
+    },
+    {
+      "test": "Invalid Sensor History",
+      "success": true,
+      "details": "Invalid sensor ID handled correctly, returned 24 entries"
+    }
+  ]
+}
