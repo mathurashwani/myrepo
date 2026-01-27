@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,9 +6,9 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 ROOT_DIR = Path(__file__).parent
@@ -39,6 +39,54 @@ class HistoricalData(BaseModel):
     temperature: float
     humidity: float
     pressure: float
+
+
+class SensorHealth(BaseModel):
+    sensor_id: str
+    sensor_name: str
+    uptime_percentage: float
+    last_online: datetime
+    total_readings: int
+    failed_readings: int
+    last_maintenance: datetime
+    next_maintenance: datetime
+    health_status: str
+
+
+class AlertConfig(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    alert_id: str = Field(default_factory=lambda: f"ALERT-{random.randint(1000, 9999)}")
+    sensor_id: str
+    metric: str
+    threshold_min: Optional[float] = None
+    threshold_max: Optional[float] = None
+    email: str
+    enabled: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class AlertConfigCreate(BaseModel):
+    sensor_id: str
+    metric: str
+    threshold_min: Optional[float] = None
+    threshold_max: Optional[float] = None
+    email: str
+    enabled: bool = True
+
+
+class MaintenanceSchedule(BaseModel):
+    sensor_id: str
+    scheduled_date: datetime
+    maintenance_type: str
+    notes: Optional[str] = None
+
+
+class MaintenanceScheduleCreate(BaseModel):
+    sensor_id: str
+    scheduled_date: str
+    maintenance_type: str
+    notes: Optional[str] = None
 
 
 def generate_mock_sensor_data():
@@ -100,6 +148,42 @@ def generate_historical_data(sensor_id: str):
     return history
 
 
+def generate_sensor_health():
+    sensors = [
+        {"id": "SENSOR-01", "name": "North Wing"},
+        {"id": "SENSOR-02", "name": "South Wing"},
+        {"id": "SENSOR-03", "name": "East Wing"},
+        {"id": "SENSOR-04", "name": "West Wing"},
+        {"id": "SENSOR-05", "name": "Central Hub"}
+    ]
+    
+    health_data = []
+    for sensor in sensors:
+        uptime = round(random.uniform(95, 99.9), 1)
+        total = random.randint(10000, 15000)
+        failed = int(total * (100 - uptime) / 100)
+        
+        last_maint = datetime.now(timezone.utc) - timedelta(days=random.randint(20, 60))
+        next_maint = datetime.now(timezone.utc) + timedelta(days=random.randint(10, 40))
+        
+        health_status = "excellent" if uptime > 99 else "good" if uptime > 97 else "fair"
+        
+        health = SensorHealth(
+            sensor_id=sensor["id"],
+            sensor_name=sensor["name"],
+            uptime_percentage=uptime,
+            last_online=datetime.now(timezone.utc) - timedelta(seconds=random.randint(1, 300)),
+            total_readings=total,
+            failed_readings=failed,
+            last_maintenance=last_maint,
+            next_maintenance=next_maint,
+            health_status=health_status
+        )
+        health_data.append(health)
+    
+    return health_data
+
+
 @api_router.get("/")
 async def root():
     return {"message": "IoT Dashboard API"}
@@ -113,6 +197,78 @@ async def get_sensors():
 @api_router.get("/sensors/{sensor_id}/history", response_model=List[HistoricalData])
 async def get_sensor_history(sensor_id: str):
     return generate_historical_data(sensor_id)
+
+
+@api_router.get("/sensors/health/all", response_model=List[SensorHealth])
+async def get_sensor_health():
+    return generate_sensor_health()
+
+
+@api_router.get("/alerts", response_model=List[AlertConfig])
+async def get_alerts():
+    alerts = await db.alerts.find({}, {"_id": 0}).to_list(1000)
+    for alert in alerts:
+        if isinstance(alert.get('created_at'), str):
+            alert['created_at'] = datetime.fromisoformat(alert['created_at'])
+    return alerts
+
+
+@api_router.post("/alerts", response_model=AlertConfig)
+async def create_alert(alert_input: AlertConfigCreate):
+    alert_dict = alert_input.model_dump()
+    alert = AlertConfig(**alert_dict)
+    
+    doc = alert.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    
+    await db.alerts.insert_one(doc)
+    return alert
+
+
+@api_router.delete("/alerts/{alert_id}")
+async def delete_alert(alert_id: str):
+    result = await db.alerts.delete_one({"alert_id": alert_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return {"message": "Alert deleted successfully"}
+
+
+@api_router.post("/alerts/test")
+async def test_alert_notification(alert_id: str):
+    alert = await db.alerts.find_one({"alert_id": alert_id}, {"_id": 0})
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    
+    return {
+        "success": True,
+        "message": f"MOCKED: Email notification sent to {alert['email']}",
+        "details": f"Alert test for {alert['sensor_id']} - {alert['metric']}"
+    }
+
+
+@api_router.get("/maintenance/schedule", response_model=List[MaintenanceSchedule])
+async def get_maintenance_schedule():
+    schedules = await db.maintenance.find({}, {"_id": 0}).to_list(1000)
+    for schedule in schedules:
+        if isinstance(schedule.get('scheduled_date'), str):
+            schedule['scheduled_date'] = datetime.fromisoformat(schedule['scheduled_date'])
+    return schedules
+
+
+@api_router.post("/maintenance/schedule", response_model=MaintenanceSchedule)
+async def create_maintenance_schedule(schedule_input: MaintenanceScheduleCreate):
+    schedule = MaintenanceSchedule(
+        sensor_id=schedule_input.sensor_id,
+        scheduled_date=datetime.fromisoformat(schedule_input.scheduled_date),
+        maintenance_type=schedule_input.maintenance_type,
+        notes=schedule_input.notes
+    )
+    
+    doc = schedule.model_dump()
+    doc['scheduled_date'] = doc['scheduled_date'].isoformat()
+    
+    await db.maintenance.insert_one(doc)
+    return schedule
 
 
 app.include_router(api_router)
