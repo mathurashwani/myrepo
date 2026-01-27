@@ -1,0 +1,151 @@
+{
+  "identity": {
+    "persona": "E1: The Anti-AI Designer",
+    "mission": "Create a 'Tactical Industrial' IoT dashboard that feels like a physical instrument, not a SaaS template.",
+    "principles": [
+      "Fusion: Industrial Control Panel x Cyberpunk HUD",
+      "Density: High information density, no wasted whitespace",
+      "Contrast: Neon signals against deep obsidian backgrounds",
+      "Texture: Grid lines and technical markers over flat surfaces"
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Chivo",
+      "body": "IBM Plex Sans",
+      "mono": "JetBrains Mono"
+    },
+    "weights": {
+      "heading": "900",
+      "body": "400",
+      "bold": "600"
+    },
+    "usage": {
+      "h1": "text-4xl font-black tracking-tighter uppercase text-foreground",
+      "h2": "text-2xl font-bold tracking-tight text-foreground/90",
+      "h3": "text-lg font-semibold tracking-wide uppercase text-muted-foreground",
+      "body": "text-sm leading-relaxed text-foreground/80",
+      "label": "text-xs font-mono uppercase tracking-widest text-muted-foreground/70",
+      "data": "font-mono text-xl tracking-tight"
+    },
+    "import_url": "https://fonts.googleapis.com/css2?family=Chivo:wght@400;900&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+  },
+  "colors": {
+    "theme": "dark",
+    "palette": {
+      "background": "#050505",
+      "foreground": "#fafafa",
+      "card": "#0a0a0a",
+      "card_foreground": "#fafafa",
+      "popover": "#0a0a0a",
+      "popover_foreground": "#fafafa",
+      "primary": "#00f0ff",
+      "primary_foreground": "#000000",
+      "secondary": "#27272a",
+      "secondary_foreground": "#fafafa",
+      "muted": "#27272a",
+      "muted_foreground": "#a1a1aa",
+      "accent": "#27272a",
+      "accent_foreground": "#fafafa",
+      "destructive": "#ef4444",
+      "destructive_foreground": "#fafafa",
+      "border": "#27272a",
+      "input": "#27272a",
+      "ring": "#00f0ff",
+      "chart_1": "#00f0ff",
+      "chart_2": "#22c55e",
+      "chart_3": "#eab308",
+      "chart_4": "#ef4444",
+      "chart_5": "#a855f7"
+    },
+    "semantic": {
+      "success": "#22c55e",
+      "warning": "#eab308",
+      "error": "#ef4444",
+      "info": "#3b82f6",
+      "grid_line": "rgba(255, 255, 255, 0.05)"
+    }
+  },
+  "layout": {
+    "grid_system": "Bento Grid (Mode B: High Density)",
+    "spacing": {
+      "container_padding": "p-6 md:p-8",
+      "gap": "gap-4",
+      "internal_padding": "p-4"
+    },
+    "structure": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[minmax(180px,auto)]",
+      "hero_chart": "col-span-1 md:col-span-3 row-span-2",
+      "status_panel": "col-span-1 md:col-span-1 row-span-2 flex flex-col gap-4",
+      "sensor_grid": "col-span-1 md:col-span-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4"
+    }
+  },
+  "components": {
+    "ui_library": "shadcn/ui",
+    "customization_rules": [
+      "Radius: 0px or 2px (Sharp/Technical look)",
+      "Borders: 1px solid border-border",
+      "Shadows: None (Flat) or 'Glow' (drop-shadow-[0_0_10px_rgba(0,240,255,0.2)]) for active elements",
+      "Glassmorphism: Avoid. Use solid backgrounds with opacity for overlays."
+    ],
+    "specific_components": {
+      "Card": {
+        "style": "bg-card border border-border/50 rounded-sm relative overflow-hidden",
+        "decoration": "Add a 'corner marker' (SVG) to the top-right for a HUD feel."
+      },
+      "Button": {
+        "style": "rounded-none font-mono uppercase tracking-wider border border-primary/50 hover:bg-primary/10 hover:text-primary transition-all duration-200",
+        "variants": {
+          "default": "bg-primary text-primary-foreground hover:bg-primary/90",
+          "outline": "bg-transparent border-input hover:bg-accent hover:text-accent-foreground"
+        }
+      },
+      "Table": {
+        "style": "font-mono text-sm border-collapse",
+        "header": "uppercase tracking-wider text-muted-foreground bg-muted/20"
+      }
+    }
+  },
+  "visual_enhancers": {
+    "textures": [
+      "Scanlines: repeating-linear-gradient(0deg, transparent, transparent 2px, #000000 3px)",
+      "Grid Background: radial-gradient(circle, #27272a 1px, transparent 1px) bg-size-20px"
+    ],
+    "motion": {
+      "hover": "transition-colors duration-200",
+      "chart_entry": "animate-in fade-in slide-in-from-bottom-4 duration-700"
+    },
+    "assets": {
+      "icons": "lucide-react (default) or @phosphor-icons/react (for technical weight)",
+      "images": [
+        {
+          "category": "background_texture",
+          "url": "https://images.unsplash.com/photo-1680992046617-e2e35451bcdb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxzZXJ2ZXIlMjByb29tJTIwZGFyayUyMGFlc3RoZXRpY3xlbnwwfHx8fDE3Njk0ODc5MjV8MA&ixlib=rb-4.1.0&q=85",
+          "usage": "Low opacity (5%) overlay on the main dashboard container to give depth."
+        }
+      ]
+    }
+  },
+  "charts": {
+    "library": "recharts (via shadcn/ui charts)",
+    "style": {
+      "grid": "stroke-border/20 stroke-dasharray-4",
+      "tooltip": "bg-popover border-border text-popover-foreground rounded-none font-mono",
+      "axis": "text-xs text-muted-foreground font-mono"
+    },
+    "palettes": {
+      "temperature": "#ef4444",
+      "humidity": "#3b82f6",
+      "pressure": "#eab308"
+    }
+  },
+  "universal_guidelines": [
+    "DO NOT use gradients for backgrounds. Use solid colors or subtle noise.",
+    "DO NOT center text. Left align everything for scanability.",
+    "Use 'data-testid' on all interactive elements.",
+    "Ensure all text has sufficient contrast (APCA/WCAG AA).",
+    "Use 'sonner' for notifications.",
+    "Avoid 'AI Slop' (generic rounded corners, heavy drop shadows). Go sharp and flat."
+  ],
+  "instructions_to_main_agent": "1. Install 'recharts' and 'lucide-react'. 2. Update 'tailwind.config.js' with the custom colors and font families. 3. Create a 'Layout' component that enforces the dark theme and grid background. 4. Build the 'SensorCard' and 'ChartWidget' components first. 5. Assemble the dashboard using the Bento Grid strategy."
+}
