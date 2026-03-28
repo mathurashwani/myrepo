@@ -1,6 +1,6 @@
 {
-  "short_name": "IoT Dashboard",
-  "name": "IoT Dashboard - Environmental Monitoring",
+  "short_name": "Ethos IoT",
+  "name": "Ethos Automation IoT Dashboard",
   "description": "Real-time environmental sensor monitoring system with temperature, humidity, and pressure tracking",
   "icons": [
     {
