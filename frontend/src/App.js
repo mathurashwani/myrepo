@@ -96,17 +96,8 @@ const Dashboard = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[minmax(180px,auto)]">
-          <div className="col-span-1 md:col-span-3 row-span-2">
-            {historicalData.length > 0 && (
-              <LineChartComponent 
-                data={historicalData} 
-                title={`24-Hour Trend - ${sensors.find(s => s.sensor_id === selectedSensor)?.sensor_name || ''}`}
-              />
-            )}
-          </div>
-
-          <div className="col-span-1 md:col-span-1 row-span-2 flex flex-col gap-4">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <GaugeChart 
               value={parseFloat(avgTemp)} 
               max={35} 
@@ -128,6 +119,15 @@ const Dashboard = () => {
               unit="hPa" 
               color="hsl(var(--chart-3))"
             />
+          </div>
+
+          <div>
+            {historicalData.length > 0 && (
+              <LineChartComponent 
+                data={historicalData} 
+                title={`24-Hour Trend - ${sensors.find(s => s.sensor_id === selectedSensor)?.sensor_name || ''}`}
+              />
+            )}
           </div>
 
           <div className="col-span-1 md:col-span-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
