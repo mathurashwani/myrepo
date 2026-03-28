@@ -155,7 +155,7 @@ const Dashboard = () => {
           <div>
             <h1 className="text-2xl md:text-4xl font-black tracking-tighter uppercase text-foreground font-heading flex items-center gap-3">
               <Database className="h-8 w-8 md:h-10 md:w-10 text-primary" />
-              IoT Dashboard
+              Ethos Automation IoT Dashboard
             </h1>
             <p className="text-xs md:text-sm leading-relaxed text-foreground/80 mt-2 font-body">
               Environmental Monitoring System
