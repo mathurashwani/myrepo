@@ -24,7 +24,41 @@ const Dashboard = () => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
   const intervalRef = useRef(null);
+
+  // PWA Install Prompt Handler
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      toast.success('App installed successfully!');
+    }
+    
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
 
   const fetchSensors = async () => {
     setLoading(true);
@@ -66,6 +100,14 @@ const Dashboard = () => {
   useEffect(() => {
     fetchSensors();
     fetchHealthData();
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch((err) => console.log('Service Worker registration failed:', err));
+    }
   }, []);
 
   useEffect(() => {
@@ -108,64 +150,75 @@ const Dashboard = () => {
         }}
       />
       
-      <div className="relative p-6 md:p-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="relative p-4 md:p-6 lg:p-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter uppercase text-foreground font-heading flex items-center gap-3">
-              <Database className="h-10 w-10 text-primary" />
+            <h1 className="text-2xl md:text-4xl font-black tracking-tighter uppercase text-foreground font-heading flex items-center gap-3">
+              <Database className="h-8 w-8 md:h-10 md:w-10 text-primary" />
               IoT Dashboard
             </h1>
-            <p className="text-sm leading-relaxed text-foreground/80 mt-2 font-body">
-              Environmental Monitoring System - Real-time Sensor Data
+            <p className="text-xs md:text-sm leading-relaxed text-foreground/80 mt-2 font-body">
+              Environmental Monitoring System
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            {showInstallButton && (
+              <button
+                data-testid="install-pwa-button"
+                onClick={handleInstallClick}
+                className="rounded-none font-mono uppercase tracking-wider border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs transition-colors duration-200 flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Install App
+              </button>
+            )}
+
             <button
               data-testid="auto-refresh-toggle"
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`rounded-none font-mono uppercase tracking-wider border px-4 py-3 transition-colors duration-200 flex items-center gap-2 ${
+              className={`rounded-none font-mono uppercase tracking-wider border px-3 py-2 text-xs transition-colors duration-200 flex items-center gap-2 ${
                 autoRefresh 
                   ? 'border-primary bg-primary/20 text-primary' 
                   : 'border-primary/50 bg-transparent hover:bg-primary/10 hover:text-primary'
               }`}
             >
-              {autoRefresh ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              Auto {autoRefresh ? 'ON' : 'OFF'}
+              {autoRefresh ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+              <span className="hidden sm:inline">Auto</span>
             </button>
 
             <button
               data-testid="configure-alerts-button"
               onClick={() => setShowAlertModal(true)}
-              className="rounded-none font-mono uppercase tracking-wider border border-primary/50 px-4 py-3 bg-transparent hover:bg-primary/10 hover:text-primary transition-colors duration-200 flex items-center gap-2"
+              className="rounded-none font-mono uppercase tracking-wider border border-primary/50 px-3 py-2 text-xs bg-transparent hover:bg-primary/10 hover:text-primary transition-colors duration-200 flex items-center gap-2"
             >
-              <Bell className="h-4 w-4" />
-              Alerts
+              <Bell className="h-3 w-3" />
+              <span className="hidden sm:inline">Alerts</span>
             </button>
 
             <button
               data-testid="export-data-button"
               onClick={() => setShowExportModal(true)}
-              className="rounded-none font-mono uppercase tracking-wider border border-primary/50 px-4 py-3 bg-transparent hover:bg-primary/10 hover:text-primary transition-colors duration-200 flex items-center gap-2"
+              className="rounded-none font-mono uppercase tracking-wider border border-primary/50 px-3 py-2 text-xs bg-transparent hover:bg-primary/10 hover:text-primary transition-colors duration-200 flex items-center gap-2"
             >
-              <Download className="h-4 w-4" />
-              Export
+              <Download className="h-3 w-3" />
+              <span className="hidden sm:inline">Export</span>
             </button>
 
             <button
               data-testid="refresh-button"
               onClick={fetchSensors}
               disabled={loading}
-              className="rounded-none font-mono uppercase tracking-wider border border-primary/50 px-6 py-3 bg-transparent hover:bg-primary/10 hover:text-primary transition-colors duration-200 flex items-center gap-2 disabled:opacity-50"
+              className="rounded-none font-mono uppercase tracking-wider border border-primary/50 px-4 py-2 text-xs bg-transparent hover:bg-primary/10 hover:text-primary transition-colors duration-200 flex items-center gap-2 disabled:opacity-50"
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </button>
           </div>
         </div>
 
         {lastUpdate && (
-          <div className="mb-6 flex items-center gap-4">
+          <div className="mb-4 flex items-center gap-4 flex-wrap">
             <div className="text-xs font-mono text-muted-foreground">
               Last updated: {lastUpdate}
             </div>
@@ -212,7 +265,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {sensors.map((sensor) => (
               <SensorCard 
                 key={sensor.sensor_id} 
