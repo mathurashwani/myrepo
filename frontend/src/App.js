@@ -130,7 +130,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          <div className="col-span-1 md:col-span-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
             {sensors.map((sensor) => (
               <SensorCard 
                 key={sensor.sensor_id} 
@@ -140,14 +140,14 @@ const Dashboard = () => {
             ))}
           </div>
 
-          <div className="col-span-1 md:col-span-4">
+          <div>
             <BarChartComponent 
               data={sensors} 
               title="Sensor Comparison"
             />
           </div>
 
-          <div className="col-span-1 md:col-span-4">
+          <div>
             <DataTable sensors={sensors} />
           </div>
         </div>
